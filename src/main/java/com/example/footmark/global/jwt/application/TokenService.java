@@ -10,6 +10,8 @@ import com.example.footmark.global.jwt.api.dto.res.MemberTokenResDto;
 import com.example.footmark.global.jwt.exception.IllegalArgumentException;
 import com.example.footmark.global.jwt.exception.InvalidTokenException;
 import com.example.footmark.member.domain.Member;
+import com.example.footmark.member.domain.Role;
+import com.example.footmark.member.domain.SocialType;
 import com.example.footmark.member.domain.repository.MemberRepository;
 import com.example.footmark.global.jwt.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.example.footmark.image.api.dto.res.DefaultImage.DEFAULT_IMAGE;
+
 @Service
 @Transactional(readOnly = true)
 @Slf4j
+@RequiredArgsConstructor
 public class TokenService {
     private final MemberRepository memberRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -34,14 +39,6 @@ public class TokenService {
     private final PasswordEncoder passwordEncoder;
 
     private final TokenRepository tokenRepository;
-
-    public TokenService(MemberRepository memberRepository, AuthenticationManagerBuilder authenticationManagerBuilder, JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder, TokenRepository tokenRepository) {
-        this.memberRepository = memberRepository;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenRepository = tokenRepository;
-    }
 
     @Transactional
     public JwtToken signIn(String username, String password) {
@@ -58,20 +55,17 @@ public class TokenService {
 
         Member member = memberRepository.findByUsername(username).orElseThrow(MemberNotFoundException::new);
 
-        // 토큰 만료 시간 설정
-        Date refreshTokenExpiryDate = new Date(System.currentTimeMillis() + 604800000);
-
         // 멤버에 대한 기존 토큰 조회
         Optional<Token> existingToken = tokenRepository.findByMember(member);
 
         if (existingToken.isPresent()) {
             // 기존 토큰이 있으면 업데이트
             Token token = existingToken.get();
-            token.updateToken(jwtToken.getRefreshToken(), refreshTokenExpiryDate);
+            token.updateToken(jwtToken.refreshToken());
             tokenRepository.save(token);
         } else {
             // 기존 토큰이 없으면 새로 생성
-            Token tokenEntity = new Token(jwtToken.getRefreshToken(), member, refreshTokenExpiryDate);
+            Token tokenEntity = new Token(jwtToken.refreshToken(), member);
             tokenRepository.save(tokenEntity);
         }
 
@@ -80,12 +74,26 @@ public class TokenService {
 
     @Transactional
     public MemberTokenResDto signUp(SignUpReqDto signUpReqDto) {
-        if (memberRepository.existsByUsername(signUpReqDto.getUsername())) {
+        if (memberRepository.existsByUsername(signUpReqDto.username())) {
             throw new IllegalArgumentException();
         }
-        // Password 암호화
-        String encodedPassword = passwordEncoder.encode(signUpReqDto.getPassword());
-        return MemberTokenResDto.from(memberRepository.save(signUpReqDto.toEntity(encodedPassword)));
+
+        String encodedPassword = passwordEncoder.encode(signUpReqDto.password());
+
+        Member member = toEntity(signUpReqDto, encodedPassword);
+
+        return MemberTokenResDto.from(memberRepository.save(member));
+    }
+
+    private Member toEntity(SignUpReqDto signUpReqDto, String encodedPassword) {
+        return Member.builder()
+                .username(signUpReqDto.username())
+                .password(encodedPassword)
+                .nickname(signUpReqDto.nickname())
+                .role(Role.ROLE_USER)
+                .picture(signUpReqDto.picture() != null ? signUpReqDto.picture() : DEFAULT_IMAGE.imageUrl)
+                .socialType(SocialType.FOOTMARK)
+                .build();
     }
 
     @Transactional

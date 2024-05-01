@@ -1,7 +1,10 @@
 package com.example.footmark.global.jwt.domain;
 
 import com.example.footmark.member.domain.Member;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,12 +12,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-@Data
+
+@RequiredArgsConstructor
+@Getter
 public class CustomUserDetail implements UserDetails {
 
     private final Member member;
 
-    public CustomUserDetail CustomUserDetail(Member member) {
+    public CustomUserDetail customUserDetail(Member member) {
         return new CustomUserDetail(member);
     }
 

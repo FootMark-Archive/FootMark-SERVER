@@ -18,8 +18,8 @@ public class SwaggerConfig {
     @Value("${myapp.local-url}")
     private String localUrl;
 
-//    @Value("${myapp.api-url}")
-//    private String prodUrl;
+    @Value("${myapp.api-url}")
+    private String prodUrl;
 
     @Bean
     public OpenAPI openAPI() {
@@ -42,9 +42,9 @@ public class SwaggerConfig {
                                 .description("Access Token(Jwt Token) 토큰을 입력해주세요.(Bearer 붙이지 않아도 됩니다~)")
                 );
 
-//        Server prodServer = new Server();
-//        prodServer.description("Production Server")
-//                .url(prodUrl);
+        Server prodServer = new Server();
+        prodServer.description("Production Server")
+                .url(prodUrl);
 
         Server localServer = new Server();
         localServer.description("Local Server")
@@ -54,7 +54,7 @@ public class SwaggerConfig {
                 .addSecurityItem(securityRequirement)
                 .components(components)
                 .info(info)
-                .servers(Arrays.asList(localServer));
+                .servers(Arrays.asList(prodServer, localServer));
     }
 
 }

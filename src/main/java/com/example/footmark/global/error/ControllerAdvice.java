@@ -43,4 +43,14 @@ public class ControllerAdvice {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+        FieldError fieldError = Objects.requireNonNull(e.getFieldError());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                String.format("%s. (%s)", fieldError.getDefaultMessage(), fieldError.getField()));
+
+        log.error("Validation error for field {}: {}", fieldError.getField(), fieldError.getDefaultMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 }

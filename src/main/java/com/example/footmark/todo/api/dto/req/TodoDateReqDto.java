@@ -1,12 +1,15 @@
 package com.example.footmark.todo.api.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record TodoDateReqDto(
+
         @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDateTime createAt
+        @NotNull
+        LocalDate createAt
 ) {
 
 }
