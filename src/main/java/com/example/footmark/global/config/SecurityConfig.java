@@ -1,5 +1,6 @@
 package com.example.footmark.global.config;
 
+import com.example.footmark.global.error.exception.CustomAuthenticationFailureHandler;
 import com.example.footmark.global.jwt.JwtAuthenticationFilter;
 import com.example.footmark.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,14 @@ public class SecurityConfig {
         return httpSecurity
                 // REST API이므로 basic auth 및 csrf 보안을 사용하지 않음
                 .csrf(AbstractHttpConfigurer::disable)
-                // JWT를 사용하기 때문에 세션을 사용하지 않음
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                // JWT를 사용하기 때문에 세션을 사용하지 않음
+                .sessionManagement(sessionManagement -> sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(handle -> handle.authenticationEntryPoint(new CustomAuthenticationFailureHandler()))
+
                 .build();
     }
 
@@ -46,9 +49,11 @@ public class SecurityConfig {
 
     private void permitAllForAuthEndpoints(HttpSecurity http) throws Exception {
         String[] permittedUrls = {
-                "/token/sign-up",
-                "/token/sign-in",
-                "/token/access"
+                "/api/sign-up",
+                "/api/sign-in",
+                "/api/access",
+                "/oauth/google/token",
+                "/oauth/apple/token"
         };
 
         for (String url : permittedUrls) {

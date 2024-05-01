@@ -22,6 +22,12 @@ spring:
 jwt:
   secret: ${jwt.secret}
 
+token:
+  expire:
+    time:
+      access: ${token.expire.time.access}
+      refresh: ${token.expire.time.refresh}
+
 springdoc:
   packages-to-scan: com.example
   default-consumes-media-type: application/json;charset=UTF-8
@@ -37,5 +43,5 @@ springdoc:
     disabled: true
 
 myapp:
-  #api-url: ${myapp.api-url}
+  api-url: ${myapp.api-url}
   local-url: ${myapp.local-url}

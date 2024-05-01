@@ -3,6 +3,10 @@ package com.example.footmark.todo.domain.repository;
 import com.example.footmark.todo.domain.Todo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TodoRepository extends JpaRepository<Todo, Long> {
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
+public interface TodoRepository extends JpaRepository<Todo, Long> {
+    List<Todo> findByMemberMemberIdAndCreateAtBetween(Long memberId, LocalDate startOfDay, LocalDate endOfDay);
 }

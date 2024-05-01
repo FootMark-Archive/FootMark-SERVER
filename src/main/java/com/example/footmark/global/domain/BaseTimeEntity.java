@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @MappedSuperclass //테이블 생성 안됨. 해당 클래스 상속한 클래스에 db추가
@@ -18,6 +19,6 @@ public abstract class BaseTimeEntity {
     @CreatedDate //JPA에서 엔티티의 생성 시간을 처리
     @Column(name = "create_at")
     @Schema(description = "생성 시각", example = "1")
-    private LocalDateTime createAt;
+    private LocalDate createAt;
 
 }
