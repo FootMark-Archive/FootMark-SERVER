@@ -12,13 +12,17 @@ public class TodoDateResDto {
 
     Long categoryId;
     String categoryName;
-
     List<String> content;
+    List<Boolean> isCompleted;
 
-    public TodoDateResDto(Long categoryId, String categoryName, List<String> content) {
+    List<Long> todoId;
+
+    public TodoDateResDto(Long categoryId, String categoryName, List<String> content, List<Boolean> isCompleted,List<Long> todoId) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.content = content;
+        this.isCompleted = isCompleted;
+        this.todoId = todoId;
     }
 
 }

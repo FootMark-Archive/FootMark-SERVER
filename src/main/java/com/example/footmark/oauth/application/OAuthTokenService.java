@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OAuthTokenService {
     private final OAuthJwtTokenProvider oauthjwttokenProvider;
     private final TokenRepository tokenRepository;
-//    private final MemberRepository memberRepository;
 
     @Transactional
     public JwtToken getToken(MemberLoginResDto memberLoginResDto) {

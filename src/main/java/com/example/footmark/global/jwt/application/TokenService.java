@@ -93,6 +93,7 @@ public class TokenService {
                 .role(Role.ROLE_USER)
                 .picture(signUpReqDto.picture() != null ? signUpReqDto.picture() : DEFAULT_IMAGE.imageUrl)
                 .socialType(SocialType.FOOTMARK)
+                .firstLogin(true)
                 .build();
     }
 
