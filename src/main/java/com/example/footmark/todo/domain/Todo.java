@@ -2,6 +2,8 @@ package com.example.footmark.todo.domain;
 
 import com.example.footmark.global.domain.BaseTimeEntity;
 import com.example.footmark.member.domain.Member;
+import com.example.footmark.todo.api.dto.req.TodoReqDto;
+import com.example.footmark.todo.api.dto.res.TodoResDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,18 +24,20 @@ public class Todo extends BaseTimeEntity {
     @Schema(description = "할일 id", example = "1")
     private Long todoId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Column
+    @Schema(description = "할일 내용", example = "캡스톤")
     private String content;
 
     @Column
+    @Schema(description = "완료 여부", example = "true, false")
     private Boolean isCompleted;
 
     @Builder
@@ -43,6 +47,14 @@ public class Todo extends BaseTimeEntity {
         this.category = category;
         this.content = content;
         this.isCompleted = isCompleted;
+    }
+
+    public void update(TodoReqDto todoReqDto){
+        this.content = todoReqDto.content();
+    }
+
+    public void updateIsCompleted() {
+        this.isCompleted = !this.isCompleted;
     }
 
 }

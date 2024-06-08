@@ -1,6 +1,5 @@
 package com.example.footmark.todo.application;
 
-import com.example.footmark.global.jwt.domain.CustomUserDetail;
 import com.example.footmark.member.domain.Member;
 import com.example.footmark.todo.api.dto.req.CategoryReqDto;
 import com.example.footmark.todo.api.dto.req.TodoDateReqDto;
@@ -8,20 +7,17 @@ import com.example.footmark.todo.api.dto.req.TodoReqDto;
 import com.example.footmark.todo.api.dto.res.CategoryResDto;
 import com.example.footmark.todo.api.dto.res.TodoDateResDto;
 import com.example.footmark.todo.api.dto.res.TodoResDto;
+import com.example.footmark.todo.api.dto.res.TodosResDto;
 import com.example.footmark.todo.domain.Category;
 import com.example.footmark.todo.domain.Todo;
 import com.example.footmark.todo.domain.repository.CategoryRepository;
 import com.example.footmark.todo.domain.repository.TodoRepository;
-import com.example.footmark.todo.exception.CategoryMemberMismatchException;
-import com.example.footmark.todo.exception.CategoryOrMemberNullException;
-import com.example.footmark.todo.exception.ExistsCategoryNameException;
+import com.example.footmark.todo.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,10 +45,11 @@ public class TodoService {
     }
 
     private Category builderCategory(CategoryReqDto categoryReqDto, Member member){
+        String color = categoryReqDto.color() != null ? categoryReqDto.color() : "black";
         return Category.builder()
                 .categoryName(categoryReqDto.categoryName())
                 .member(member)
-                .color(categoryReqDto.color())
+                .color(color)
                 .build();
     }
 
@@ -64,7 +61,30 @@ public class TodoService {
     }
 
     @Transactional
-    public TodoResDto createTodo(TodoReqDto todoReqDto, Member member, Category category){
+    public CategoryResDto updateCategory(Long categoryId, CategoryReqDto categoryReqDto, Member member) {
+        Category category = categoryRepository.findByCategoryIdAndMember(categoryId, member)
+                .orElseThrow(CategoryMemberNotFoundException::new);
+
+        category.update(categoryReqDto);
+
+        return CategoryResDto.of(category);
+    }
+
+    @Transactional
+    public void deleteCategory(Long categoryId, Member member) {
+        Category category = categoryRepository.findByCategoryIdAndMember(categoryId, member)
+                .orElseThrow(CategoryMemberNotFoundException::new);
+
+        todoRepository.deleteByCategory(category);
+
+        categoryRepository.delete(category);
+    }
+
+    @Transactional
+    public TodoResDto createTodo(TodoReqDto todoReqDto, Member member, Long categoryId){
+
+        Category category = categoryRepository.findByCategoryIdAndMember(categoryId, member)
+                .orElseThrow(CategoryMemberNotFoundException::new);
         //카테고리id의 멤버와 요청 멤버와 일치 해야함.
         validateCategoryMemberMatch(category, member);
 
@@ -95,22 +115,47 @@ public class TodoService {
         }
     }
 
-    public List<TodoDateResDto> findAll(TodoDateReqDto todoDateReqDto, Member member) {
-        LocalDate startOfDay = todoDateReqDto.createAt();
-        LocalDate endOfDay = startOfDay.plusDays(1);
-
-        // 데이터베이스에서 할일 목록 조회
-        List<Todo> todos = todoRepository.findByMemberMemberIdAndCreateAtBetween(member.getMemberId(), startOfDay, endOfDay);
-
-        // 조회한 할 일 목록을 TodoDateResDto로 변환하여 반환
-        return todos.stream()
-                .collect(Collectors.groupingBy(Todo::getCategory))
-                .entrySet().stream()
-                .map(entry -> new TodoDateResDto(
-                        entry.getKey().getCategoryId(),
-                        entry.getKey().getCategoryName(),
-                        entry.getValue().stream().map(Todo::getContent).collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
+    public TodosResDto findAll(TodoDateReqDto todoDateReqDto, Member member) {
+        return todoRepository.findAll(todoDateReqDto, member);
     }
+
+
+
+    @Transactional
+    public TodoResDto updateTodo(Long todoId, TodoReqDto todoReqDto, Member member){
+        Todo todo = todoRepository.findById(todoId).orElseThrow(TodoNotFoundException::new);
+
+        validateTodoMemberMatch(todo, member);
+
+        todo.update(todoReqDto);
+        return TodoResDto.of(todo);
+    }
+
+    private void validateTodoMemberMatch(Todo todo, Member member){
+        if(!todo.getMember().getMemberId().equals(member.getMemberId())) {
+            throw new TodoMemberMismatchException();
+        }
+    }
+
+    @Transactional
+    public void deleteTodo(Long todoId, Member member){
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(TodoNotFoundException::new);
+
+        validateTodoMemberMatch(todo, member);
+
+        todoRepository.delete(todo);
+    }
+
+    @Transactional
+    public void updateTodoIsCompleted(Long todoId, Member member) {
+        Todo todo = todoRepository.findById(todoId).orElseThrow(TodoNotFoundException::new);
+
+        validateTodoMemberMatch(todo, member);
+
+        todo.updateIsCompleted();
+
+        todoRepository.save(todo);
+    }
+
 }

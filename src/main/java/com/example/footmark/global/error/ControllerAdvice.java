@@ -7,6 +7,7 @@ import com.example.footmark.global.error.exception.NotFoundGroupException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -50,6 +51,13 @@ public class ControllerAdvice {
                 String.format("%s. (%s)", fieldError.getDefaultMessage(), fieldError.getField()));
 
         log.error("Validation error for field {}: {}", fieldError.getField(), fieldError.getDefaultMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(final HttpMessageNotReadableException e) {
+        log.error("HttpMessageNotReadableException: ", e);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "요청 포맷이 올바르지 않습니다. yyyy-MM-dd 형식에 맞춰주세요.");
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

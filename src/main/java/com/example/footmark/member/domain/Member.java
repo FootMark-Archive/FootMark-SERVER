@@ -37,8 +37,11 @@ public class Member{
     @Schema(description = "소셜로그인 타입", example = "FOOTMARK, GOOGLE, APPLE")
     private SocialType socialType;
 
+    @Schema(description = "최초 로그인 구분", example = "true, false")
+    private boolean firstLogin;
+
     @Builder
-    public Member(Long memberId, String username, String password, String nickname, Role role, String picture, SocialType socialType) {
+    public Member(Long memberId, String username, String password, String nickname, Role role, String picture, SocialType socialType, Boolean firstLogin) {
         this.memberId = memberId;
         this.username = username;
         this.password = password;
@@ -46,5 +49,10 @@ public class Member{
         this.role = role;
         this.picture = picture;
         this.socialType = socialType;
+        this.firstLogin = firstLogin;
+    }
+
+    public void firstLoginUpdate() {
+        this.firstLogin = false;
     }
 }
