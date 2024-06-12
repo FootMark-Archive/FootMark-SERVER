@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -46,9 +48,10 @@ public class EmojiService {
     }
 
     @Transactional
-    public EmojiResDto updateEmoji(Long emojiId, EmojiUpdateReqDto emojiReqDto, Member member){
-        Emoji emoji = emojiRepository.findById(emojiId).orElseThrow(EmojiNotFoundException::new);
-
+    public EmojiResDto updateEmoji(String createAt, EmojiUpdateReqDto emojiReqDto, Member member){
+        LocalDate date = LocalDate.parse(createAt);
+        Emoji emoji = emojiRepository.findByCreateAtAndMember(date, member)
+                .orElseThrow(EmojiNotFoundException::new);
         validateEmojiMemberMatch(emoji, member);
 
         emoji.update(emojiReqDto);
@@ -66,8 +69,9 @@ public class EmojiService {
     }
 
     @Transactional
-    public void deleteEmoji(Long emojiId, Member member){
-        Emoji emoji = emojiRepository.findById(emojiId)
+    public void deleteEmoji(String createAt, Member member){
+        LocalDate date = LocalDate.parse(createAt);
+        Emoji emoji = emojiRepository.findByCreateAtAndMember(date, member)
                 .orElseThrow(EmojiNotFoundException::new);
 
         validateEmojiMemberMatch(emoji, member);

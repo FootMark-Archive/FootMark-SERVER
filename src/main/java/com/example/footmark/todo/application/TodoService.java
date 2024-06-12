@@ -115,8 +115,8 @@ public class TodoService {
         }
     }
 
-    public TodosResDto findAll(TodoDateReqDto todoDateReqDto, Member member) {
-        return todoRepository.findAll(todoDateReqDto, member);
+    public TodosResDto findAll(String createAt, Member member) {
+        return todoRepository.findAll(createAt, member);
     }
 
 

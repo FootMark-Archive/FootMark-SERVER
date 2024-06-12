@@ -33,8 +33,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public ReviewsResDto findAll(ReviewDateReqDto reviewDateReqDto, Member member) {
-        LocalDate date = reviewDateReqDto.createAt(); // 요청받은 날짜
+    public ReviewsResDto findAll(String createAt, Member member) {
+        LocalDate date = LocalDate.parse(createAt); // 요청받은 날짜
 
         List<Category> categories = queryFactory
                 .selectFrom(category)
@@ -72,9 +72,9 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
 
     @Override
     public Page<ReviewMonthResDto> findAllMonth(
-            Member member, String categoryName, ReviewMonthReqDto reviewMonthReqDto, Pageable pageable) {
-        LocalDate startDate = reviewMonthReqDto.startDate();
-        LocalDate endDate = reviewMonthReqDto.endDate();
+            Member member, String categoryName, String startdate, String enddate, Pageable pageable) {
+        LocalDate startDate = LocalDate.parse(startdate);
+        LocalDate endDate = LocalDate.parse(enddate);
 
         // categoryName이 null일 때와 아닐 때를 구분하여 조건을 생성
         BooleanExpression categoryCondition = categoryName != null ? review.category.categoryName.eq(categoryName) : null;

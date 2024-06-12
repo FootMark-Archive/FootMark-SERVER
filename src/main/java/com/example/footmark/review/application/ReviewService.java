@@ -1,8 +1,6 @@
 package com.example.footmark.review.application;
 
 import com.example.footmark.member.domain.Member;
-import com.example.footmark.review.api.dto.req.ReviewDateReqDto;
-import com.example.footmark.review.api.dto.req.ReviewMonthReqDto;
 import com.example.footmark.review.api.dto.req.ReviewReqDto;
 import com.example.footmark.review.api.dto.req.ReviewUpdateReqDto;
 import com.example.footmark.review.api.dto.res.ReviewMonthResDto;
@@ -65,8 +63,8 @@ public class ReviewService {
         }
     }
 
-    public ReviewsResDto findAll(ReviewDateReqDto reviewDateReqDto, Member member) {
-        return reviewRepository.findAll(reviewDateReqDto, member);
+    public ReviewsResDto findAll(String createAt, Member member) {
+        return reviewRepository.findAll(createAt, member);
     }
 
     @Transactional
@@ -99,8 +97,8 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    public Page<ReviewMonthResDto> findAllMonth(ReviewMonthReqDto reviewMonthReqDto, Member member, String categoryName, Pageable pageable) {
-        return reviewRepository.findAllMonth(member, categoryName, reviewMonthReqDto, pageable);
+    public Page<ReviewMonthResDto> findAllMonth(String startDate, String endDate, Member member, String categoryName, Pageable pageable) {
+        return reviewRepository.findAllMonth(member, categoryName, startDate, endDate, pageable);
     }
 
 }
