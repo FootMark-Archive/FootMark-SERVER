@@ -13,6 +13,7 @@ import com.example.footmark.todo.api.dto.res.TodosResDto;
 import com.example.footmark.todo.application.TodoService;
 import com.example.footmark.todo.domain.Category;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -89,15 +90,17 @@ public class TodoController {
         return new RspTemplate<>(HttpStatus.OK, "할일 등록 성공", todoResDto);
     }
 
-    @Operation(summary = "할일 조회", description = "당일 할일 조회합니다")
+    @Operation(summary = "할일 조회", description = "당일 할일 조회합니다",parameters = {
+            @Parameter(name = "createAt", description = "value = 조회 날짜, example = 2024-05-01")
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "헤더 없음 or 토큰 불일치", content = @Content(schema = @Schema(example = "INVALID_HEADER or INVALID_TOKEN")))
     })
     @GetMapping("/todos")
-    public RspTemplate<TodosResDto> getTodos(@Valid @RequestBody TodoDateReqDto todoDateReqDto, @AuthenticationPrincipal CustomUserDetail customUserDetail) {
+    public RspTemplate<TodosResDto> getTodos(@Valid @RequestParam String createAt, @AuthenticationPrincipal CustomUserDetail customUserDetail) {
         // 해당 멤버의 연, 월, 일로 검색
-        TodosResDto todosResDto = todoService.findAll(todoDateReqDto, customUserDetail.getMember());
+        TodosResDto todosResDto = todoService.findAll(createAt, customUserDetail.getMember());
 
         return new RspTemplate<>(HttpStatus.OK, "할일 조회 성공", todosResDto);
     }

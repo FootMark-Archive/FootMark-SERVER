@@ -11,9 +11,9 @@ import org.springframework.data.domain.Pageable;
 
 
 public interface ReviewCustomRepository {
-    ReviewsResDto findAll(ReviewDateReqDto reviewDateReqDto, Member member);
+    ReviewsResDto findAll(String createAt, Member member);
 
     Page<ReviewMonthResDto> findAllMonth(
-            Member member, String categoryName, ReviewMonthReqDto reviewMonthReqDto, Pageable pageable);
+            Member member, String categoryName, String startDate, String endDate, Pageable pageable);
 
 }

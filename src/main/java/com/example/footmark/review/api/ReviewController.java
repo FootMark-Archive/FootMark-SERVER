@@ -11,6 +11,7 @@ import com.example.footmark.review.api.dto.res.ReviewResDto;
 import com.example.footmark.review.api.dto.res.ReviewsResDto;
 import com.example.footmark.review.application.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,14 +49,16 @@ public class ReviewController {
         return new RspTemplate<>(HttpStatus.OK, "일기 등록 성공", reviewResDto);
     }
 
-    @Operation(summary = "당일 일기 조회", description = "당일 일기 조회합니다")
+    @Operation(summary = "당일 일기 조회", description = "당일 일기 조회합니다",parameters = {
+            @Parameter(name = "createAt", description = "value = 조회 날짜, example = 2024-05-01")
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "헤더 없음 or 토큰 불일치", content = @Content(schema = @Schema(example = "INVALID_HEADER or INVALID_TOKEN")))
     })
-    @PostMapping("/daily")
-    public RspTemplate<ReviewsResDto> getReviews(@Valid @RequestBody ReviewDateReqDto reviewDateReqDto, @AuthenticationPrincipal CustomUserDetail member) {
-        ReviewsResDto reviewsResDto = reviewService.findAll(reviewDateReqDto, member.getMember());
+    @GetMapping("/daily")
+    public RspTemplate<ReviewsResDto> getReviews(@Valid @RequestParam String createAt, @AuthenticationPrincipal CustomUserDetail member) {
+        ReviewsResDto reviewsResDto = reviewService.findAll(createAt, member.getMember());
         return new RspTemplate<>(HttpStatus.OK, "일기 목록 조회 성공", reviewsResDto);
     }
 
@@ -87,21 +90,26 @@ public class ReviewController {
         return new RspTemplate<>(HttpStatus.OK, "일기 삭제 성공");
     }
 
-    @Operation(summary = "한달 일기 조회", description = "한달 일기 조회합니다")
+    @Operation(summary = "한달 일기 조회", description = "한달 일기 조회합니다",
+            parameters = {
+                @Parameter(name = "startDate", description = "value = 시작 날짜, example = 2024-05-01"),
+                    @Parameter(name = "endDate", description = "value = 종료 날짜, example = 2024-05-31")
+            }
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "헤더 없음 or 토큰 불일치", content = @Content(schema = @Schema(example = "INVALID_HEADER or INVALID_TOKEN")))
     })
-    @PostMapping("/monthly")
+    @GetMapping("/monthly")
     public RspTemplate<Page<ReviewMonthResDto>> getReviews(
-            @Valid @RequestBody ReviewMonthReqDto reviewMonthReqDto,
+            @RequestParam String startDate, @RequestParam String endDate,
             @AuthenticationPrincipal CustomUserDetail member,
             @RequestParam(required = false) String categoryName,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size)
     {
         Pageable pageable = PageRequest.of(page,size);
-        Page<ReviewMonthResDto> reviewMonthResDto = reviewService.findAllMonth(reviewMonthReqDto, member.getMember(), categoryName, pageable);
+        Page<ReviewMonthResDto> reviewMonthResDto = reviewService.findAllMonth(startDate, endDate, member.getMember(), categoryName, pageable);
         return new RspTemplate<>(HttpStatus.OK, "일기 목록 조회 성공", reviewMonthResDto);
     }
 

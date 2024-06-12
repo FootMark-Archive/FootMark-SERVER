@@ -25,8 +25,8 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public TodosResDto findAll(TodoDateReqDto todoDateReqDto, Member member) {
-        LocalDate startOfDay = todoDateReqDto.createAt();
+    public TodosResDto findAll(String createAt, Member member) {
+        LocalDate startOfDay = LocalDate.parse(createAt);
 
         // 할 일 조회
         List<Todo> todos = queryFactory

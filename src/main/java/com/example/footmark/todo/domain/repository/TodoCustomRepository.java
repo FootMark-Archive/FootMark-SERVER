@@ -5,5 +5,5 @@ import com.example.footmark.todo.api.dto.req.TodoDateReqDto;
 import com.example.footmark.todo.api.dto.res.TodosResDto;
 
 public interface TodoCustomRepository {
-    TodosResDto findAll(TodoDateReqDto todoDateReqDto, Member member);
+    TodosResDto findAll(String createAt, Member member);
 }
